@@ -99,7 +99,11 @@ footer{padding:28px 0;color:#777;border-top:1px solid #292929;font-size:13px}
         img.src=path; img.alt=captionFromName(path); img.loading='lazy';
         slide.appendChild(img);
       } else return;
-
+     
+      const cap=document.createElement('span');
+cap.className='media-caption';
+cap.textContent=captionFromName(path);
+slide.appendChild(cap);
        track.appendChild(slide);
     });
 
