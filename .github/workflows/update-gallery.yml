@@ -1,1 +1,50 @@
+name: Update gallery list
 
+on:
+  push:
+    paths:
+      - 'gallery/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-gallery:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get repository
+        uses: actions/checkout@v4
+
+      - name: Build gallery list
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          allowed = {
+              '.jpg', '.jpeg', '.png', '.webp',
+              '.gif', '.avif', '.mp4', '.webm', '.ogg'
+          }
+
+          files = [
+              p.as_posix()
+              for p in Path('gallery').iterdir()
+              if p.is_file() and p.suffix.lower() in allowed
+          ]
+
+          files.sort(key=lambda s: s.lower())
+
+          Path('gallery-files.json').write_text(
+              json.dumps(files, indent=2, ensure_ascii=False),
+              encoding='utf-8'
+          )
+
+      - name: Save gallery list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add gallery-files.json
+          git diff --cached --quiet || git commit -m "Update gallery list"
+          git push
